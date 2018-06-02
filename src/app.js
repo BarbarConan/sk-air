@@ -1,6 +1,51 @@
-import React from 'react';
+import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
+import axios from 'axios';
 
-import App from './components/Applications';
+import ListItems from './components/ListItems';
 
-ReactDOM.render(<App />, document.getElementById('root'));
+import './main.scss';
+
+const api = {
+  fetchData: () => axios.get('/data.json').then(res => res.data),
+};
+
+class List extends Component {
+  state = {
+    listData: [],
+  };
+
+  componentWillMount() {
+    api.fetchData().then(data => {
+      this.setState(() => ({
+        listData: data,
+      }));
+    });
+  }
+
+  deleteItem = item => {
+    this.setState(prevState => ({
+      listData: prevState.listData.filter(el => el !== item),
+    }));
+  };
+
+  collapse = item => {
+    this.setState(prevState => ({
+      listData: prevState.listData.map(el => {
+        const arr = el;
+        if (el === item) {
+          arr.isCollapsed = !el.isCollapsed;
+        }
+        return arr;
+      }),
+    }));
+  };
+
+  render() {
+    return (
+      <ListItems data={this.state.listData} deleteFn={this.deleteItem} collaspeFn={this.collapse} />
+    );
+  }
+}
+
+ReactDOM.render(<List />, document.getElementById('root'));
